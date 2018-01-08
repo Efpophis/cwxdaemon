@@ -1,0 +1,59 @@
+# commands to be copy-pasted for ts-2000
+
+# get radio ID - should be 019
+ID;
+
+# VFO A freq - read
+FA;
+
+# set vfo A freq in Hz, 11 digits
+FA00014195000;
+
+# electronic keyer recording status
+# read
+LM;
+
+# answer will look like LM#;
+# where # is
+# 0 - inactive
+# 1 - ch1 recording
+# 2 - ch2 recording
+# 3 - ch3 recording
+
+# start or to stop, send the following, replacing # with:
+# 0 - stop
+# 1 - record ch1
+# 2 - record ch2
+# 3 - record ch3
+
+LM#;
+
+# read current WPM setting of electronic keyer:
+KS;
+
+# returns KS###; where ### is 010 - 060 WPM
+
+# set WPM to, in this case, 30:
+KS030;
+
+
+# keyer command - check buffer availability first:
+KY;
+
+# response: KY# where
+# 0 - available
+# 1 - not available
+
+# "converts the characters to Morse Code" .. ok?
+# don't know if this sends it over the air, lets
+# you use it in conjunction with LM; to program
+# the keyer memory, or what .. will have to try it out.
+# buffer is fixed length (24), so line it up:
+            111111111122222;
+KY 123456789012345678901234;
+
+# some pre-formatted examples ...
+
+KY WK2X WK2X               ;
+KY RR 5NN 5NN 73           ;
+KY CQ DX CQ DX DE WK2X WK2X;KY  K K                    ;
