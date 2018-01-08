@@ -13,13 +13,18 @@
 
 using namespace std;
 
-CWXKeyer::CWXKeyer() : m_cwx(), m_wpm(0)
+CWXKeyer::CWXKeyer() : m_cwx(), m_wpm(0), m_seq(0)
 {
+}
+
+const std::string CWXKeyer::Seq(void)
+{
+    return string("C" + to_string(++m_seq) + "|");
 }
 
 void CWXKeyer::setWPM(int wpm)
 {    
-    string wpmCmd = "c1|cwx wpm " + std::to_string(wpm) + "\n";
+    string wpmCmd = Seq() + "cwx wpm " + std::to_string(wpm) + "\n";
     
     if ( wpm >= 10 && wpm <= 60 )
     {         
@@ -42,7 +47,7 @@ int CWXKeyer::abortCW()
 {
     int result = -1;
     
-    string abortCmd = "C2|cwx clear\n";
+    string abortCmd = Seq() + "cwx clear\n";
         
     result = m_cwx.Write( (unsigned char*)abortCmd.c_str(), abortCmd.length() );
     
@@ -55,9 +60,6 @@ int CWXKeyer::abortCW()
 }
 
 
-
-
-
 int CWXKeyer::transmitCW( const std::string& msg )
 {
     return transmitCW( const_cast<char*>(msg.c_str()), msg.length() );
@@ -65,11 +67,13 @@ int CWXKeyer::transmitCW( const std::string& msg )
 
 int CWXKeyer::transmitCW( char* msg, unsigned int length )
 {
-    string txCmd = "C3|cwx send \"" + string(msg, length) + "\"\n";
+    string txCmd = Seq() + "cwx send \"" + string(msg, length) + "\"\n";
     int txbytes;
     int result = 0;
 
     txbytes = m_cwx.Write( (unsigned char*)txCmd.c_str(), txCmd.length() );
+    
+    //cout << txCmd;
             
     if ( txbytes != txCmd.length() )
     {

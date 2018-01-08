@@ -97,7 +97,9 @@ void daemon( UdpSocket& mySocket, CWXKeyer& myKeyer )
                 }
             }
             else
-            {                                
+            {                
+                //cout << string((char*)msg) << endl;
+                                
                 bytesSent = myKeyer.transmitCW( (char*)msg, bytesRead );
                 
                 if ( bytesSent == -1 )

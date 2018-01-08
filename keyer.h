@@ -20,6 +20,9 @@ class CWXKeyer
     private:
         ClientSocket m_cwx;
         int m_wpm;
+        uint32_t m_seq;
+        
+        const std::string Seq(void);
 };
 
 
