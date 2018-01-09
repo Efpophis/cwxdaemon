@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <getopt.h>
 #include "udpsocket.h"
 #include "clisocket.h"
 #include "keyer.h"
@@ -11,27 +12,65 @@ using namespace std;
 // before sending any more to it.
 #define KEYER_MAX_BUFFER_SIZE (256)
 #define ESC (27)
+#define DEFAULT_CWD_PORT (60000)
+#define FLEX_API_PORT (4992)
 
 void daemon( UdpSocket&, CWXKeyer& );
 
 int main( int argc, char* argv[])
 {
-    // TODO: map out args and use optarg here
-    if ( argc != 3 )
-    {
-        cout << "Usage: " << argv[0] << " [udp port] [host name/ip]" << endl;
-        exit(1);
-    }
-    
-    unsigned short netPort = atoi( argv[1] );
-    string flexHost = argv[2];
+      
+    unsigned short udpPort  = DEFAULT_CWD_PORT; //atoi( argv[1] );
+    unsigned short flexPort = FLEX_API_PORT;
+    string flexHost = "localhost"; // = argv[2];
     
     UdpSocket mySocket;
     CWXKeyer myKeyer;
+    int done = 0;
     
-    if ( mySocket.initialize( netPort ) )
+    while (!done)
+    {
+        int this_option_optind = optind ? optind : 1;
+        int option_index = 0;
+        static struct option long_options[] =
+        {
+            {"udpport", required_argument, 0, 0},
+            {"flexhost", required_argument, 0, 1},
+            {"flexport", required_argument, 0, 2},
+            {0,0,0,0}
+        };
+    
+        int c = getopt_long(argc,argv,"",long_options, &option_index);
+        
+        switch (c)
+        {
+            case 0:
+                udpPort = stoi(string(optarg));
+            break;
+
+            case 1:
+                flexHost = string(optarg);
+            break;
+            
+            case 2:
+                flexPort = stoi(string(optarg));
+                cerr << "WARNING: overriding Flex API port to " << flexPort << endl;
+            break;
+            
+            default:
+            case -1:
+                done = 1;
+            break;    
+            
+        }
+    }
+    
+    cout << "listening on UDP: " << udpPort << endl;
+    cout << "Connecting to host: " << flexHost << " : " << flexPort << endl;
+        
+    if ( mySocket.initialize( udpPort ) )
     {   
-        if ( myKeyer.init( flexHost.c_str() ) )
+        if ( myKeyer.init( flexHost.c_str(), flexPort ) != -1 )
         {
             daemon( mySocket, myKeyer );
         }
@@ -43,7 +82,7 @@ int main( int argc, char* argv[])
     }
     else
     {
-        cerr << "Failed to initialize udp socket on port " << netPort << endl;
+        cerr << "Failed to initialize udp socket on port " << udpPort << endl;
         exit(1);    
     }   
     
